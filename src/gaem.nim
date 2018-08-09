@@ -70,6 +70,22 @@ log(sevDebug, "main", "Creating buffers and VAOs")
 
 # Vertex Array / Buffer setup
 # TODO: Move this into helper class.
+
+# Y   
+# | Z 
+# |/  
+# *--X
+
+#    *--------*
+#   /        /|
+#  /        / |
+# *--------*  |
+# |\_      |  |
+# |  \_ #2 |  *
+# | #1 \_  | /
+# |      \_|/
+# *--------*
+
 var cube = @[
   # Left (-X)
   vec3f(-1.0, -1.0,  1.0), vec3f(-1.0,  1.0,  1.0), vec3f(-1.0, -1.0, -1.0),
@@ -84,12 +100,13 @@ var cube = @[
   vec3f(-1.0,  1.0, -1.0), vec3f(-1.0,  1.0,  1.0), vec3f( 1.0,  1.0,  1.0),
   vec3f( 1.0,  1.0,  1.0), vec3f( 1.0,  1.0, -1.0), vec3f(-1.0,  1.0, -1.0),
   # Back (-Z)
-  vec3f(-1.0,  1.0,  1.0), vec3f( 1.0, -1.0,  1.0), vec3f( 1.0,  1.0,  1.0),
-  vec3f(-1.0,  1.0,  1.0), vec3f(-1.0, -1.0,  1.0), vec3f( 1.0, -1.0,  1.0),
+  vec3f(-1.0,  1.0,  1.0), vec3f( 1.0, -1.0,  1.0), vec3f( 1.0,  1.0,  1.0), #1
+  vec3f(-1.0,  1.0,  1.0), vec3f(-1.0, -1.0,  1.0), vec3f( 1.0, -1.0,  1.0), #2
   # Front (+Z)
   vec3f(-1.0, -1.0, -1.0), vec3f(-1.0,  1.0, -1.0), vec3f( 1.0,  1.0, -1.0),
   vec3f( 1.0,  1.0, -1.0), vec3f( 1.0, -1.0, -1.0), vec3f(-1.0, -1.0, -1.0),
 ];
+
 var cubeColors = @[
   C_MAROON, C_MAROON, C_MAROON, C_MAROON, C_MAROON, C_MAROON, # Left
   C_RED,    C_RED,    C_RED,    C_RED,    C_RED,    C_RED,    # Right
