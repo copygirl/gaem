@@ -33,22 +33,23 @@ proc toRGB*(value: Color): int =
     (int(value.blue) * 255).clamp(0, 255)
 
 
-const C_BLACK*   = newColorRGB(0x000000)
-const C_SILVER*  = newColorRGB(0xC0C0C0)
-const C_GRAY*    = newColorRGB(0x808080)
 const C_WHITE*   = newColorRGB(0xFFFFFF)
-const C_MAROON*  = newColorRGB(0x800000)
+const C_GRAY*    = newColorRGB(0x808080)
+const C_SILVER*  = newColorRGB(0xC0C0C0)
+const C_BLACK*   = newColorRGB(0x000000)
+
 const C_RED*     = newColorRGB(0xFF0000)
-const C_PURPLE*  = newColorRGB(0x800080)
-const C_FUCHSIA* = newColorRGB(0xFF00FF)
-const C_GREEN*   = newColorRGB(0x008000)
-const C_LIME*    = newColorRGB(0x00FF00)
+const C_MAROON*  = newColorRGB(0x800000)
+const C_YELLOW*  = newColorRGB(0xFFFF00)
 const C_OLIVE*   = newColorRGB(0x808000)
-const C_YELLOW*  = newColorRGB(0x000080)
-const C_NAVY*    = newColorRGB(0x0000FF)
-const C_BLUE*    = newColorRGB(0x008080)
-const C_TEAL*    = newColorRGB(0x000080)
+const C_LIME*    = newColorRGB(0x00FF00)
+const C_GREEN*   = newColorRGB(0x008000)
 const C_AQUA*    = newColorRGB(0x00FFFF)
+const C_TEAL*    = newColorRGB(0x008080)
+const C_BLUE*    = newColorRGB(0x0000FF)
+const C_NAVY*    = newColorRGB(0x000080)
+const C_FUCHSIA* = newColorRGB(0xFF00FF)
+const C_PURPLE*  = newColorRGB(0x800080)
 
 
 proc glClear*(value: Color) =
