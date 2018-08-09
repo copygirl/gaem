@@ -60,7 +60,7 @@ let modelviewLoc  = program.getUniform("modelview")
 program.use()
 
 var projection = perspective(radians(75'f32), 800 / 450'f32, 0.1, 100)
-var modelview  = lookAt(vec3f(2, 2, 2), vec3f(0, 0, 0), vec3f(0, 1, 0))
+var modelview  = lookAt(vec3f(0, 2, -3), vec3f(0, 0, 0), vec3f(0, 1, 0))
 projectionLoc.set(projection)
 
 
@@ -71,26 +71,32 @@ log(sevDebug, "main", "Creating buffers and VAOs")
 # Vertex Array / Buffer setup
 # TODO: Move this into helper class.
 var cube = @[
-  vec3f(-1.0, -1.0, -1.0), vec3f(-1.0, -1.0,  1.0), vec3f(-1.0,  1.0,  1.0),
-  vec3f( 1.0,  1.0, -1.0), vec3f(-1.0, -1.0, -1.0), vec3f(-1.0,  1.0, -1.0),
-  vec3f( 1.0, -1.0,  1.0), vec3f(-1.0, -1.0, -1.0), vec3f( 1.0, -1.0, -1.0),
-  vec3f( 1.0,  1.0, -1.0), vec3f( 1.0, -1.0, -1.0), vec3f(-1.0, -1.0, -1.0),
-  vec3f(-1.0, -1.0, -1.0), vec3f(-1.0,  1.0,  1.0), vec3f(-1.0,  1.0, -1.0),
-  vec3f( 1.0, -1.0,  1.0), vec3f(-1.0, -1.0,  1.0), vec3f(-1.0, -1.0, -1.0),
-  vec3f(-1.0,  1.0,  1.0), vec3f(-1.0, -1.0,  1.0), vec3f( 1.0, -1.0,  1.0),
-  vec3f( 1.0,  1.0,  1.0), vec3f( 1.0, -1.0, -1.0), vec3f( 1.0,  1.0, -1.0),
-  vec3f( 1.0, -1.0, -1.0), vec3f( 1.0,  1.0,  1.0), vec3f( 1.0, -1.0,  1.0),
+  # Left (-X)
+  vec3f(-1.0, -1.0,  1.0), vec3f(-1.0,  1.0,  1.0), vec3f(-1.0, -1.0, -1.0),
+  vec3f(-1.0,  1.0, -1.0), vec3f(-1.0, -1.0, -1.0), vec3f(-1.0,  1.0,  1.0),
+  # Right (+X)
+  vec3f( 1.0, -1.0, -1.0), vec3f( 1.0,  1.0, -1.0), vec3f( 1.0,  1.0,  1.0),
+  vec3f( 1.0,  1.0,  1.0), vec3f( 1.0, -1.0,  1.0), vec3f( 1.0, -1.0, -1.0),
+  # Bottom (-Y)
+  vec3f(-1.0, -1.0,  1.0), vec3f(-1.0, -1.0, -1.0), vec3f( 1.0, -1.0,  1.0),
+  vec3f( 1.0, -1.0, -1.0), vec3f( 1.0, -1.0,  1.0), vec3f(-1.0, -1.0, -1.0),
+  # Top (+Y)
+  vec3f(-1.0,  1.0, -1.0), vec3f(-1.0,  1.0,  1.0), vec3f( 1.0,  1.0,  1.0),
   vec3f( 1.0,  1.0,  1.0), vec3f( 1.0,  1.0, -1.0), vec3f(-1.0,  1.0, -1.0),
-  vec3f( 1.0,  1.0,  1.0), vec3f(-1.0,  1.0, -1.0), vec3f(-1.0,  1.0,  1.0),
-  vec3f( 1.0,  1.0,  1.0), vec3f(-1.0,  1.0,  1.0), vec3f( 1.0, -1.0,  1.0)
+  # Back (-Z)
+  vec3f(-1.0,  1.0,  1.0), vec3f( 1.0, -1.0,  1.0), vec3f( 1.0,  1.0,  1.0),
+  vec3f(-1.0,  1.0,  1.0), vec3f(-1.0, -1.0,  1.0), vec3f( 1.0, -1.0,  1.0),
+  # Front (+Z)
+  vec3f(-1.0, -1.0, -1.0), vec3f(-1.0,  1.0, -1.0), vec3f( 1.0,  1.0, -1.0),
+  vec3f( 1.0,  1.0, -1.0), vec3f( 1.0, -1.0, -1.0), vec3f(-1.0, -1.0, -1.0),
 ];
 var cubeColors = @[
-  C_RED,    C_RED,    C_RED,    C_RED,    C_RED,    C_RED,
-  C_LIME,   C_LIME,   C_LIME,   C_LIME,   C_LIME,   C_LIME,
-  C_BLUE,   C_BLUE,   C_BLUE,   C_BLUE,   C_BLUE,   C_BLUE,
-  C_YELLOW, C_YELLOW, C_YELLOW, C_YELLOW, C_YELLOW, C_YELLOW,
-  C_PURPLE, C_PURPLE, C_PURPLE, C_PURPLE, C_PURPLE, C_PURPLE,
-  C_WHITE,  C_WHITE,  C_WHITE,  C_WHITE,  C_WHITE,  C_WHITE
+  C_MAROON, C_MAROON, C_MAROON, C_MAROON, C_MAROON, C_MAROON, # Left
+  C_RED,    C_RED,    C_RED,    C_RED,    C_RED,    C_RED,    # Right
+  C_GREEN,  C_GREEN,  C_GREEN,  C_GREEN,  C_GREEN,  C_GREEN,  # Bottom
+  C_LIME,   C_LIME,   C_LIME,   C_LIME,   C_LIME,   C_LIME,   # Top
+  C_NAVY,   C_NAVY,   C_NAVY,   C_NAVY,   C_NAVY,   C_NAVY,   # Back
+  C_BLUE,   C_BLUE,   C_BLUE,   C_BLUE,   C_BLUE,   C_BLUE,   # Front
 ];
 
 let vBuffer = createBuffer(BufferTarget.Array, cube)
