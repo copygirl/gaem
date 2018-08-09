@@ -32,7 +32,6 @@ when not defined(release):
   glDebugMessageCallback(debugMessageCallback, nil)
   glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nil, false)
 
-
 glEnable(GL_BLEND)
 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
@@ -41,9 +40,8 @@ glEnable(GL_DEPTH_TEST)
 glEnable(GL_CULL_FACE)
 glFrontFace(GL_CCW)
 
-# FIXME: Don't hardcode, get window size somehow.
-glViewport(0, 0, 1280, 720)
-
+var projection: Mat4[float32]
+var modelview: Mat4[float32]
 
 # ========================================
 
@@ -58,10 +56,6 @@ program.link()
 let projectionLoc = program.getUniform("projection")
 let modelviewLoc  = program.getUniform("modelview")
 program.use()
-
-var projection = perspective(radians(75'f32), 800 / 450'f32, 0.1, 100)
-var modelview  = lookAt(vec3f(0, 2, -3), vec3f(0, 0, 0), vec3f(0, 1, 0))
-projectionLoc.set(projection)
 
 
 # ========================================
@@ -148,17 +142,29 @@ proc processEvents() =
       running = false
     else: discard
 
+var tick = 0
 while running:
   processEvents()
   
-  modelview = modelview.rotate(0.01, vec3f(0, 1, 0))
+  
+  let size = getWindowSize()
+  glViewport(0, 0, GLSizei(size.width), GLSizei(size.height))
+  
+  let aspect = size.width.toFloat / size.height.toFloat
+  projection = perspective(radians(75'f32), aspect, 0.1, 100)
+  modelview  = lookAt(vec3f(0, 2, -3), vec3f(0, 0, 0), vec3f(0, 1, 0))
+    .rotate(tick.toFloat() * 0.01, vec3f(0, 1, 0))
+  
+  projectionLoc.set(projection)
   modelviewLoc.set(modelview)
+  
   
   glClear(BG_COLOR)
   vao.glBindVertexArray()
   glDrawArrays(GL_TRIANGLES, 0, GLsizei(cube.len))
   
   swapBuffers()
+  inc tick
 
 
 # ========================================

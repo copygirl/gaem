@@ -48,6 +48,7 @@ type
 
 var
   window: WindowPtr
+  windowSize: WindowSize
   context: GlContextPtr
 
 ## Initializes SDL2, creates and shows the window.
@@ -61,11 +62,17 @@ proc initWindow*(title: string, size: WindowSize) =
     y = SDL_WINDOWPOS_CENTERED,
     w = int32(size.width),
     h = int32(size.height),
-    flags = SDL_WINDOW_SHOWN or SDL_WINDOW_OPENGL
+    flags = SDL_WINDOW_OPENGL or
+            SDL_WINDOW_SHOWN or
+            SDL_WINDOW_RESIZABLE
   )
   
   if isNil window:
     raise newException(SdlException, "Error during sdl2.createWindow: " & $sdl2.getError())
+  
+  var w, h: cint
+  sdl2.getSize(window, w, h)
+  windowSize = (int(w), int(h))
   
   # OpenGL flags
   discard glSetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, int32(GL_VERSION[0]))
@@ -86,6 +93,9 @@ proc initWindow*(title: string, size: WindowSize) =
   context = window.glCreateContext()
   lastFrameTime = cpuTime()
 
+## Returns the size of the main game window.
+proc getWindowSize*(): WindowSize = windowSize
+
 # TODO: Handle pollEvent more nicely.
 export
   Event,
@@ -93,6 +103,14 @@ export
 iterator pollEvents*(): Event =
   var event: Event = defaultEvent
   while pollEvent(event):
+    case event.kind:
+      of WindowEvent:
+        let w = event.evWindow()
+        case w.event:
+          of WindowEvent_Resized:
+            windowSize = (int(w.data1), int(w.data2))
+          else: discard
+      else: discard
     yield event
 
 ## Swaps the OpenGL buffers.
