@@ -2,14 +2,13 @@ import
   # Dependencies
   glm,
   opengl,
-  sdl2,
   strutils,
   
   # Project imports
   config,
+  window,
   
   gfx/color,
-  gfx/window,
   gfx/gl/buffer,
   gfx/gl/shader,
   
@@ -137,15 +136,17 @@ setControlCHook(stop)
 
 proc processEvents() =
   for event in pollEvents():
-    case event.kind
-    of EventType.QuitEvent:
-      running = false
-    else: discard
+    case event.kind:
+      of evQuit:
+        running = false
+      of evKeyDown:
+        if event.keysym.scancode == SDL_SCANCODE_ESCAPE:
+          running = false
+      else: discard
 
 var tick = 0
 while running:
   processEvents()
-  
   
   let size = getWindowSize()
   glViewport(0, 0, GLSizei(size.width), GLSizei(size.height))

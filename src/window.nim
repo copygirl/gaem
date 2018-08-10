@@ -2,7 +2,7 @@ import
   sdl2,
   times,
   
-  ../config
+  config
 
 
 # ========================================
@@ -45,6 +45,34 @@ proc getFps*(maxSeconds = 5.0): float =
 type
   SdlException* = object of Exception
   WindowSize* = tuple[width: int, height: int]
+  
+  WindowEventKind* = enum
+    evQuit,
+    evResize,
+    evKeyDown,
+    evKeyUp,
+    # evKeyPress,
+    # evMouseDown,
+    # evMouseUp,
+  WindowEvent* = object
+    case kind*: WindowEventKind
+      of evResize:
+        windowSize*: WindowSize
+      of evKeyDown, evKeyUp:
+        keysym*: KeySym
+      # of evMouseDown, evMouseUp:
+      #   mousePosition*: Point
+      else: discard
+
+export
+  Point,
+  KeySym,
+  Scancode,
+  Keymod,
+  KMOD_CTRL,
+  KMOD_SHIFT,
+  KMOD_ALT,
+  KMOD_GUI
 
 var
   window: WindowPtr
@@ -96,22 +124,28 @@ proc initWindow*(title: string, size: WindowSize) =
 ## Returns the size of the main game window.
 proc getWindowSize*(): WindowSize = windowSize
 
-# TODO: Handle pollEvent more nicely.
-export
-  Event,
-  EventType
-iterator pollEvents*(): Event =
+## Polls SDL2 for any events that might have occured, yielding those.
+iterator pollEvents*(): WindowEvent =
   var event: Event = defaultEvent
   while pollEvent(event):
     case event.kind:
-      of WindowEvent:
-        let w = event.evWindow()
+      of QuitEvent:
+        yield WindowEvent(kind: evQuit)
+      
+      of KeyDown:
+        yield WindowEvent(kind: evKeyDown, keysym: event.evKeyboard.keysym)
+      of KeyUp:
+        yield WindowEvent(kind: evKeyUp, keysym: event.evKeyboard.keysym)
+      
+      of sdl2.WindowEvent:
+        let w = event.evWindow
         case w.event:
           of WindowEvent_Resized:
             windowSize = (int(w.data1), int(w.data2))
+            yield WindowEvent(kind: evResize, windowSize: windowSize)
           else: discard
+      
       else: discard
-    yield event
 
 ## Swaps the OpenGL buffers.
 proc swapBuffers*() =
