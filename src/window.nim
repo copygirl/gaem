@@ -46,22 +46,30 @@ type
   SdlException* = object of Exception
   WindowSize* = tuple[width: int, height: int]
   
+  MouseButton* = enum
+    mbLeft   = BUTTON_LEFT,
+    mbMiddle = BUTTON_MIDDLE,
+    mbRight  = BUTTON_RIGHT,
+    mbX1     = BUTTON_X1,
+    mbX2     = BUTTON_X2,
+  
   WindowEventKind* = enum
     evQuit,
     evResize,
     evKeyDown,
     evKeyUp,
-    # evKeyPress,
-    # evMouseDown,
-    # evMouseUp,
+    evMouseMotion,
+    evMouseDown,
+    evMouseUp,
   WindowEvent* = object
     case kind*: WindowEventKind
-      of evResize:
-        windowSize*: WindowSize
       of evKeyDown, evKeyUp:
         keysym*: KeySym
-      # of evMouseDown, evMouseUp:
-      #   mousePosition*: Point
+      of evMouseMotion:
+        mouseMotion*: Point
+      of evMouseDown, evMouseUp:
+        mouseButton*: MouseButton
+        mousePosition*: Point
       else: discard
 
 export
@@ -77,6 +85,8 @@ export
 var
   window: WindowPtr
   windowSize: WindowSize
+  mousePosition: Point
+  mouseButtonDown: uint32
   context: GlContextPtr
 
 ## Initializes SDL2, creates and shows the window.
@@ -99,12 +109,12 @@ proc initWindow*(title: string, size: WindowSize) =
     raise newException(SdlException, "Error during sdl2.createWindow: " & $sdl2.getError())
   
   var w, h: cint
-  sdl2.getSize(window, w, h)
-  windowSize = (int(w), int(h))
+  window.getSize(w, h)
+  windowSize = (w.int, h.int)
   
   # OpenGL flags
-  discard glSetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, int32(GL_VERSION[0]))
-  discard glSetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, int32(GL_VERSION[1]))
+  discard glSetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GL_VERSION[0].int32)
+  discard glSetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GL_VERSION[1].int32)
   discard glSetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE)
   
   when not defined(release):
@@ -124,6 +134,17 @@ proc initWindow*(title: string, size: WindowSize) =
 ## Returns the size of the main game window.
 proc getWindowSize*(): WindowSize = windowSize
 
+## Returns the position of the mouse pointer in the window.
+proc getMousePosition*(): Point = mousePosition
+## Sets the position of the mouse pointer relative to the window.
+proc setMousePosition*(p: Point) = warpMouseInWindow(window, p[0], p[0])
+
+proc getRelativeMouseMode*(): bool = sdl2.getRelativeMouseMode().bool
+proc setRelativeMouseMode*(enable: bool) = discard sdl2.setRelativeMouseMode(enable.Bool32)
+
+proc isDown*(button: MouseButton): bool =
+  (mouseButtonDown and (1'u32 shl button.int)) != 0
+
 ## Polls SDL2 for any events that might have occured, yielding those.
 iterator pollEvents*(): WindowEvent =
   var event: Event = defaultEvent
@@ -137,12 +158,31 @@ iterator pollEvents*(): WindowEvent =
       of KeyUp:
         yield WindowEvent(kind: evKeyUp, keysym: event.evKeyboard.keysym)
       
+      of MouseMotion:
+        let ev = event.evMouseMotion
+        let m  = (ev.xrel, ev.yrel).Point
+        mousePosition = (ev.x, ev.y).Point
+        yield WindowEvent(kind: evMouseMotion, mouseMotion: m)
+      
+      of MouseButtonDown:
+        let ev = event.evMouseButton
+        let mb = MouseButton(ev.button)
+        let p  = (ev.x, ev.y).Point
+        mouseButtonDown = mouseButtonDown or (1'u32 shl mb.int)
+        yield WindowEvent(kind: evMouseDown, mouseButton: mb, mousePosition: p)
+      of MouseButtonUp:
+        let ev = event.evMouseButton
+        let mb = MouseButton(ev.button)
+        let p  = (ev.x, ev.y).Point
+        mouseButtonDown = mouseButtonDown and not (1'u32 shl mb.int)
+        yield WindowEvent(kind: evMouseUp, mouseButton: mb, mousePosition: p)
+      
       of sdl2.WindowEvent:
-        let w = event.evWindow
-        case w.event:
+        let ev = event.evWindow
+        case ev.event:
           of WindowEvent_Resized:
-            windowSize = (int(w.data1), int(w.data2))
-            yield WindowEvent(kind: evResize, windowSize: windowSize)
+            windowSize = (ev.data1.int, ev.data2.int)
+            yield WindowEvent(kind: evResize)
           else: discard
       
       else: discard

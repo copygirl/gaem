@@ -28,7 +28,7 @@ macro log*(severity: static[LogSeverity], group: static[string], m: varargs[type
     setForegroundColor(fgWhite)
     write(stdout, `groupStr`)
     
-    resetAttributes()
+    resetAttributes(stdout)
     # styledWriteLine(stdout, `m`)
     flushFile(stdout)
   
