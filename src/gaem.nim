@@ -158,18 +158,20 @@ proc processEvents() =
         # Quit the game when the ESCAPE key is pressed.
         if event.keysym.scancode == SDL_SCANCODE_ESCAPE:
           running = false
-      of evMouseDown:
-        setRelativeMouseMode(true)
-      of evMouseUp:
-        setRelativeMouseMode(false)
+      of evMouseMotion:
+        if mbRight.isDown:
+          var yaw = event.mouseMotion[0].toFloat / 100.0
+          modelview.rotateInpl(yaw, vec3f(0, 1, 0))
+          modelviewLoc.set(modelview)
+      # FIXME: Relative mouse doesn't work with sway / wayland :(
+      # of evMouseDown:
+      #   setRelativeMouseMode(true)
+      # of evMouseUp:
+      #   setRelativeMouseMode(false)
       else: discard
 
 while running:
   processEvents()
-  
-  if mbRight.isDown:
-    modelview.rotateInpl(0.01, vec3f(0, 1, 0))
-    modelviewLoc.set(modelview)
   
   glClear(BG_COLOR)
   vao.glBindVertexArray()
