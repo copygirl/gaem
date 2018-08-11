@@ -28,7 +28,7 @@ type
 converter toGLhandle*(value: Program): GLhandle = value.handle
 converter toGLhandle*(value: Shader): GLhandle = value.handle
 converter toGLint*(value: Uniform): GLint = value.location
-converter toGLenum*(value: ShaderType): GLenum = GLenum(value)
+converter toGLenum*(value: ShaderType): GLenum = value.GLenum
 
 ## Returns the information log of the OpenGL object, or nil if none.
 proc getInfoLog[T](obj: T): string =
@@ -117,4 +117,4 @@ proc getUniform*(program: Program, name: string): Uniform =
 # TODO: Make uniform setting strongly typed?
 
 proc set*(uniform: Uniform, value: var Mat4f) =
-  uniform.glUniformMatrix4fv(1, false, addr(value[0,0]))
+  uniform.glUniformMatrix4fv(1, false, value[0,0].addr)

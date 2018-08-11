@@ -21,8 +21,8 @@ type
     StaticDraw = GL_STATIC_DRAW
 
 converter toHandle*(value: Buffer): GLhandle = value.handle
-converter toEnum*(value: BufferTarget): GLenum = GLEnum(value)
-converter toEnum*(value: BufferUsageHint): GLenum = GLEnum(value)
+converter toEnum*(value: BufferTarget): GLenum = value.GLEnum
+converter toEnum*(value: BufferUsageHint): GLenum = value.GLEnum
 
 
 ## Generates a new OpenGL Buffer object with the specified target.
