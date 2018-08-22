@@ -2,4 +2,9 @@
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
   "editor.renderWhitespace": "boundary",
+  
+  "files.exclude": {
+    ".git": true,
+    "src/nimcache": true,
+  }
 }

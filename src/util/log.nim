@@ -9,7 +9,7 @@ type LogSeverity* = enum
   sevInfo  = "Info"
   sevDebug = "Debug"
 
-macro log*(severity: static[LogSeverity], group: static[string], m: varargs[typed]): untyped =
+macro log*(severity: static[LogSeverity], group: static[string], args: varargs[typed]): untyped =
   let sevStr   = align("[" & toUpperAscii($severity) & "] ", 8)
   let sevColor = case severity
     of sevError: fgRed
@@ -29,9 +29,9 @@ macro log*(severity: static[LogSeverity], group: static[string], m: varargs[type
     write(stdout, `groupStr`)
     
     resetAttributes(stdout)
-    # styledWriteLine(stdout, `m`)
+    # styledWriteLine(stdout, `args`)
     flushFile(stdout)
   
   let wl = newCall(bindSym"styledWriteLine", bindSym"stdout")
-  for arg in m: wl.add(arg)
+  args.copyChildrenTo(wl)
   result.insert(result.len-1, wl)
