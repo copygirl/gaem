@@ -43,14 +43,14 @@ proc isDown*(button: MouseButton): bool =
 
 proc handleInputEvent*(event: sdl2.Event) =
   case event.kind:
-    of KeyDown: KeyDownEvent.fire(event.evKeyboard.keysym)
-    of KeyUp:   KeyUpEvent.fire(event.evKeyboard.keysym)
+    of KeyDown: KeyDownEvent.fire event.evKeyboard.keysym
+    of KeyUp:   KeyUpEvent.fire event.evKeyboard.keysym
     
     of MouseMotion:
       let ev = event.evMouseMotion
       let m  = (ev.xrel, ev.yrel).Point
       mousePosition = (ev.x, ev.y)
-      MouseMotionEvent.fire(MouseMotionEventArgs(motion: m))
+      MouseMotionEvent.fire MouseMotionEventArgs(motion: m)
     
     of MouseButtonDown, MouseButtonUp:
       let ev = event.evMouseButton
@@ -58,10 +58,10 @@ proc handleInputEvent*(event: sdl2.Event) =
       let p  = (ev.x, ev.y).Point
       if event.kind == MouseButtonDown:
         mouseButtonDown = mouseButtonDown or (1'u32 shl ev.button)
-        MouseDownEvent.fire(MouseButtonEventArgs(button: mb, position: p))
+        MouseDownEvent.fire MouseButtonEventArgs(button: mb, position: p)
       else:
         mouseButtonDown = mouseButtonDown and not (1'u32 shl ev.button)
-        MouseUpEvent.fire(MouseButtonEventArgs(button: mb, position: p))
+        MouseUpEvent.fire MouseButtonEventArgs(button: mb, position: p)
     
     else: discard
 
