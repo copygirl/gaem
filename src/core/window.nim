@@ -109,7 +109,7 @@ proc initWindow*(title: string, size: WindowSize) =
 proc getWindowSize*(): WindowSize = windowSize
 
 ## Polls SDL2 for any events that might have occured.
-proc processEvents*(): WindowEvent =
+proc processEvents*() =
   var event: sdl2.Event = defaultEvent
   while pollEvent(event):
     case event.kind:

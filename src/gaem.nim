@@ -29,7 +29,8 @@ proc stop*() {.noconv.} =
   running = false
 
 setControlCHook(stop)
-QuitEvent.subscribe(stop)
+# Since stop() is {.noconv.} it only works like so:
+QuitEvent.subscribe proc() = stop()
 
 
 # ========================================
