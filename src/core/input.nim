@@ -61,7 +61,7 @@ proc handleInputEvent*(event: sdl2.Event) =
         MouseDownEvent.fire(MouseButtonEventArgs(button: mb, position: p))
       else:
         mouseButtonDown = mouseButtonDown and not (1'u32 shl ev.button)
-        MouseDownEvent.fire(MouseButtonEventArgs(button: mb, position: p))
+        MouseUpEvent.fire(MouseButtonEventArgs(button: mb, position: p))
     
     else: discard
 
