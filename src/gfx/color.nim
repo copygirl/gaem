@@ -1,5 +1,3 @@
-import opengl as gl
-
 type
   Color* = object
     red*: float32
@@ -12,7 +10,7 @@ proc newColor*(red, green, blue: float32, alpha = 1.0): Color =
   Color(red: red, green: green, blue: blue, alpha: alpha)
 
 proc newColor*(red, green, blue: int, alpha = 255): Color =
-  newColor(float(red) / 255, float(green) / 255, float(blue) / 255, float(alpha) / 255)
+  newColor(red.float / 255, green.float / 255, blue.float / 255, alpha.float / 255)
 
 proc newColorARGB*(value: int): Color =
   newColor(value shr 16 and 0xFF, value shr 8 and 0xFF, value and 0xFF, value shr 24 and 0xFF)
@@ -22,15 +20,15 @@ proc newColorRGB*(value: int): Color =
 
 
 proc toARGB*(value: Color): int =
-  (int(value.alpha) * 255).clamp(0, 255) shl 24 or
-    (int(value.red) * 255).clamp(0, 255) shl 16 or
-    (int(value.green) * 255).clamp(0, 255) shl 8 or
-    (int(value.blue) * 255).clamp(0, 255)
+  (value.alpha.int * 255).clamp(0, 255) shl 24 or
+    (value.red.int * 255).clamp(0, 255) shl 16 or
+    (value.green.int * 255).clamp(0, 255) shl 8 or
+    (value.blue.int * 255).clamp(0, 255)
 
 proc toRGB*(value: Color): int =
-  (int(value.red) * 255).clamp(0, 255) shl 16 or
-    (int(value.green) * 255).clamp(0, 255) shl 8 or
-    (int(value.blue) * 255).clamp(0, 255)
+  (value.red.int * 255).clamp(0, 255) shl 16 or
+    (value.green.int * 255).clamp(0, 255) shl 8 or
+    (value.blue.int * 255).clamp(0, 255)
 
 
 const C_WHITE*   = newColorRGB(0xFFFFFF)
@@ -50,8 +48,3 @@ const C_BLUE*    = newColorRGB(0x0000FF)
 const C_NAVY*    = newColorRGB(0x000080)
 const C_FUCHSIA* = newColorRGB(0xFF00FF)
 const C_PURPLE*  = newColorRGB(0x800080)
-
-
-proc glClear*(value: Color) =
-  glClearColor(value.red, value.blue, value.green, value.alpha)
-  glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)

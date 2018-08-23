@@ -18,8 +18,6 @@ import
   ./util/log
 
 
-const BG_COLOR = newColorRGB(0x441111)
-
 var
   running = true
   projectionLoc , modelviewLoc : Uniform
@@ -28,9 +26,10 @@ var
 proc stop*() {.noconv.} =
   running = false
 
-setControlCHook(stop)
 # Since stop() is {.noconv.} it only works like so:
 QuitEvent.subscribe proc() = stop()
+
+setControlCHook(stop)
 
 
 # ========================================
@@ -54,6 +53,9 @@ proc onWindowResized() =
   projection = perspective(radians(75'f32), aspect, 0.1, 100)
   projectionLoc.set(projection)
 ResizeEvent.subscribe(onWindowResized)
+
+let bg = newColorRGB(0x441111)
+glClearColor(bg.red, bg.blue, bg.green, bg.alpha)
 
 glEnable(GL_BLEND)
 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
@@ -172,7 +174,7 @@ MouseUpEvent.subscribe proc(args: MouseButtonEventArgs) =
 while running:
   processEvents()
   
-  glClear(BG_COLOR)
+  glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
   vao.glBindVertexArray()
   glDrawArrays(GL_TRIANGLES, 0, cube.len.GLsizei)
   
