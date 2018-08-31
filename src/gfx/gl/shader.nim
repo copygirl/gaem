@@ -115,5 +115,5 @@ proc getUniform*(program: Program, name: string): Uniform =
 
 # TODO: Make uniform setting strongly typed?
 
-proc set*(uniform: Uniform, value: var Mat4f) =
-  uniform.glUniformMatrix4fv(1, false, value[0,0].addr)
+proc set*(uniform: Uniform, value: Mat4f) =
+  uniform.glUniformMatrix4fv(1, false, value.arr[0].arr[0].unsafeAddr)
