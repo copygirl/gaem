@@ -3,7 +3,7 @@ import
   times,
   
   ../config,
-  ./events,
+  ./event,
   ./input
 
 

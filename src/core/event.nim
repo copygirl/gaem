@@ -1,12 +1,12 @@
 import macros
 
 type
-  ## Represents an event callback, fired when a certain event occurs.
   EventHandler*[T] = proc(event: T) {.nimcall.}
+    ## Represents an event callback, fired when a certain event occurs.
   
-  ## Represents an event, which listeners can subscribe to.
-  ## When the even fires, listeners will be notified in an unspecified order.
   Event*[T] = object
+    ## Represents an event, which listeners can subscribe to.
+    ## When the even fires, listeners will be notified in an unspecified order.
     handlers: seq[EventHandler[T]]
 
 

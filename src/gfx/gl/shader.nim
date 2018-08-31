@@ -4,17 +4,17 @@ import
   strutils
 
 type
-  ## Represents an OpenGL program object.
   Program* = object
+    ## Represents an OpenGL program object.
     handle*: GLhandle
   
-  ## Represents an OpenGL shader object.
   Shader* = object
+    ## Represents an OpenGL shader object.
     handle*: GLhandle
     shaderType*: ShaderType
   
-  ## Represents an OpenGL uniform variable for a program object.
   Uniform* = object
+    ## Represents an OpenGL uniform variable for a program object.
     location*: GLint
   
   ShaderType* {.pure.} = enum GLenum
@@ -30,10 +30,9 @@ converter toGLhandle*(value: Shader): GLhandle = value.handle
 converter toGLint*(value: Uniform): GLint = value.location
 converter toGLenum*(value: ShaderType): GLenum = value.GLenum
 
-## Returns the information log of the OpenGL object, or nil if none.
 proc getInfoLog[T](obj: T): string =
-  # Decide which procs/values to use based on the object type.
-  when T is Program:
+  ## Returns the information log of the OpenGL object, or nil if none.
+  when T is Program: # Decide which procs/values to use based on the object type.
     const
       getiv       = glGetProgramiv
       getInfoLog  = glGetProgramInfoLog
@@ -54,56 +53,56 @@ proc getInfoLog[T](obj: T): string =
     getInfoLog(obj, logLength, addr logLength, result)
   else: result = nil
 
-## Raises a ShaderException if the OpenGL object has an information log.
 proc checkInfoLog[T](obj: T) =
+  ## Raises a ShaderException if the OpenGL object has an information log.
   let log = obj.getInfoLog()
   if not isNil(log):
     raise newException(ShaderException, log)
 
 
-## Creates and returns a new OpenGL Program.
 proc newProgram*(): Program =
+  ## Creates and returns a new OpenGL Program.
   Program(handle: glCreateProgram())
 
-## Attaches a Shader to a Program.
 proc attach*(program: Program, shader: Shader) =
+  ## Attaches a Shader to a Program.
   glAttachShader(program, shader)
 
-## Links a Program, raising an exception if it failed.
 proc link*(program: Program) =
+  ## Links a Program, raising an exception if it failed.
   glLinkProgram(program)
   program.checkInfoLog()
 
-## Intalls a Program as part of the current rendering state.
 proc use*(program: Program) =
+  ## Intalls a Program as part of the current rendering state.
   glUseProgram(program)
 
 
-## Creates a new OpenGL Shader object.
 proc newShader*(shaderType: ShaderType): Shader =
+  ## Creates a new OpenGL Shader object.
   Shader(handle: glCreateShader(shaderType),
          shaderType: shaderType)
 
-## Sets the source code of a Shader.
 proc source*(shader: Shader, source: string) =
+  ## Sets the source code of a Shader.
   let sourceArr = [source].allocCStringArray()
   defer: sourceArr.deallocCStringArray()
   glShaderSource(shader, 1, sourceArr, nil)
 
-## Compiles a Shader, raising an exception if it failed.
 proc compile*(shader: Shader) =
+  ## Compiles a Shader, raising an exception if it failed.
   glCompileShader(shader)
   shader.checkInfoLog()
 
 
-## Creates and compiles a new Shader from a source string.
 proc loadShaderString*(shaderType: ShaderType, source: string): Shader =
+  ## Creates and compiles a new Shader from a source string.
   result = newShader(shaderType)
   result.source(source)
   result.compile()
 
-## Creates and compiles a new Shader from a source file.
 proc loadShaderFile*(shaderType: ShaderType, path: string): Shader =
+  ## Creates and compiles a new Shader from a source file.
   loadShaderString(shaderType, readFile(path))
 
 

@@ -7,7 +7,7 @@ import
   # Project imports
   ./config,
   
-  ./core/events,
+  ./core/event,
   ./core/input,
   ./core/window,
   
@@ -17,6 +17,8 @@ import
   
   ./util/log
 
+
+log(sevInfo, "main", "Starting gaem ", VERSION)
 
 var
   running = true

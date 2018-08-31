@@ -1,6 +1,6 @@
 import
   sdl2,
-  ./events
+  ./event
 
 type
   MouseButton* = enum
@@ -37,8 +37,8 @@ var
   mousePosition: Point
   mouseButtonDown: uint32
 
-## Returns whether the specified mouse button is currently held down.
 proc isDown*(button: MouseButton): bool =
+  ## Returns whether the specified mouse button is currently held down.
   (mouseButtonDown and (1'u32 shl button.int)) != 0
 
 proc handleInputEvent*(event: sdl2.Event) =
