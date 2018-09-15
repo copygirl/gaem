@@ -11,26 +11,18 @@ import
 
 
 var
-  projectionLoc: Uniform
-  projection: Mat4f
-  modelviewLoc: Uniform
-  modelviewStack = @[ mat4f() ]
+  projectionLoc , modelviewLoc : Uniform
+  projection    , modelview    : Mat4f
 
-proc getModelview(): Mat4f =
-  modelviewStack[^1]
-
-proc pushModelview(m: Mat4f) =
-  modelviewStack.add(m)
+proc setModelview(m: Mat4f) =
+  modelview = m
   modelviewLoc.set(m)
 
-proc popModelview() =
-  discard modelviewStack.pop()
-  modelviewLoc.set(getModelview())
-
 template withModelview*(m: Mat4f, body: untyped) =
-  pushModelview(m)
+  let oldModelview = modelview
+  setModelview(modelview * m)
   body
-  popModelview()
+  setModelview(oldModelview)
 
 
 proc onWindowResized() =
@@ -39,6 +31,7 @@ proc onWindowResized() =
   let aspect = size.width.toFloat / size.height.toFloat
   projection = perspective(radians(75'f32), aspect, 0.1, 100)
   projectionLoc.set(projection)
+
 ResizeEvent.subscribe(onWindowResized)
 
 
@@ -79,4 +72,4 @@ proc loadShaders*() =
   program.use()
   
   onWindowResized()
-  modelviewLoc.set(getModelview())
+  setModelview(mat4f())
