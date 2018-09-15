@@ -6,6 +6,8 @@ import
   # Project imports
   ./config,
   
+  ./core/entity/camera,
+  ./core/entity/utility,
   ./core/event,
   ./core/input,
   ./core/window,
@@ -46,18 +48,18 @@ log(sevDebug, "main", "Creating buffers and VAOs")
 # Vertex Array / Buffer setup
 # TODO: Move this into helper class.
 
-# Y   
-# | Z 
-# |/  
-# *--X
+# Y (Top)
+# | Z (Front)
+# |/
+# *--X (Right)
 
 #    *--------*
 #   /        /|
 #  /        / |
 # *--------*  |
 # |\_      |  |
-# |  \_ #2 |  *
-# | #1 \_  | /
+# |  \_#10 |  *
+# | #9 \_  | /
 # |      \_|/
 # *--------*
 
@@ -75,8 +77,8 @@ var cube = @[
   vec3f(-1.0,  1.0, -1.0), vec3f(-1.0,  1.0,  1.0), vec3f( 1.0,  1.0,  1.0),
   vec3f( 1.0,  1.0,  1.0), vec3f( 1.0,  1.0, -1.0), vec3f(-1.0,  1.0, -1.0),
   # Back (-Z)
-  vec3f(-1.0,  1.0,  1.0), vec3f( 1.0, -1.0,  1.0), vec3f( 1.0,  1.0,  1.0), #1
-  vec3f(-1.0,  1.0,  1.0), vec3f(-1.0, -1.0,  1.0), vec3f( 1.0, -1.0,  1.0), #2
+  vec3f(-1.0,  1.0,  1.0), vec3f( 1.0, -1.0,  1.0), vec3f( 1.0,  1.0,  1.0), #9
+  vec3f(-1.0,  1.0,  1.0), vec3f(-1.0, -1.0,  1.0), vec3f( 1.0, -1.0,  1.0), #10
   # Front (+Z)
   vec3f(-1.0, -1.0, -1.0), vec3f(-1.0,  1.0, -1.0), vec3f( 1.0,  1.0, -1.0),
   vec3f( 1.0,  1.0, -1.0), vec3f( 1.0, -1.0, -1.0), vec3f(-1.0, -1.0, -1.0),
@@ -109,29 +111,24 @@ glEnableVertexAttribArray(1)
 
 log(sevDebug, "main", "Starting game loop")
 
-var camera = lookAt(vec3f(0, 2, -3), vec3f(0, 0, 0), vec3f(0, 1, 0))
+var cam = Camera(position: vec3f(0, 2, -3), speed: 100)
 
 KeyDownEvent.subscribe proc(keysym: KeySym) =
-  # Quit the game when the ESCAPE key is pressed.
-  if keysym.scancode == SDL_SCANCODE_ESCAPE:
-    running = false
-
-MouseMotionEvent.subscribe proc(args: MouseMotionEventArgs) =
-  if mbRight.isDown:
-    var yaw = args.motion[0].toFloat / 100.0
-    camera.rotateInpl(yaw, vec3f(0, 1, 0))
-
-MouseDownEvent.subscribe proc(args: MouseButtonEventArgs) =
-  setRelativeMouseMode(true)
-MouseUpEvent.subscribe proc(args: MouseButtonEventArgs) =
-  setRelativeMouseMode(false)
+  case keysym.scancode:
+    # Quit the game when the ESCAPE key is pressed.
+    of SDL_SCANCODE_ESCAPE: running = false
+    else: discard
 
 while running:
   processEvents()
   
   glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
   
-  withModelview(camera):
+  let frameTime = getFrameTime();
+  
+  cam.update(frameTime)
+  
+  withModelview(cam.viewTransform):
     vao.glBindVertexArray()
     glDrawArrays(GL_TRIANGLES, 0, cube.len.GLsizei)
   
