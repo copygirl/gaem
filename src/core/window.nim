@@ -25,14 +25,19 @@ proc updateFrameTiming() =
   frameTiming[frameTimingIndex] = currentFrameTime - lastFrameTime
   lastFrameTime = currentFrameTime
 
-## Yields the frame timings of the up to 200 last frames.
-## That is, the time in seconds it took between each swapBuffers call.
 iterator getFrameTimings*(): float =
+  ## Yields the frame timings of the up to 200 last frames.
+  ## That is, the time in seconds it took between each swapBuffers call.
   for i in 0..frameTimingSize-1:
     yield frameTiming[(frameTimingIndex - i + MaxFrameTimings) mod MaxFrameTimings]
 
-## Gets the average FPS over the last up to X seconds (5 by default).
+proc getFrameTime*(): float =
+  ## Returns the time in seconds the last frame took to render.
+  for x in getFrameTimings():
+    return x
+
 proc getFps*(maxSeconds = 5.0): float =
+  ## Gets the average FPS over the last up to X seconds (5 by default).
   var all = 0.0
   var count = 0
   for t in getFrameTimings(): 
@@ -63,8 +68,8 @@ var
   windowSize: WindowSize
   context: GlContextPtr
 
-## Initializes SDL2, creates and shows the window.
 proc initWindow*(title: string, size: WindowSize) =
+  ## Initializes SDL2, creates and shows the window.
   if sdl2.init(INIT_VIDEO or INIT_AUDIO or INIT_EVENTS) != SdlSuccess:
     raise newException(SdlException, "Error during sdl2.init: " & $sdl2.getError())
   
@@ -105,11 +110,12 @@ proc initWindow*(title: string, size: WindowSize) =
   context = window.glCreateContext()
   lastFrameTime = cpuTime()
 
-## Returns the size of the main game window.
-proc getWindowSize*(): WindowSize = windowSize
+proc getWindowSize*(): WindowSize =
+  ## Returns the size of the main game window.
+  result = windowSize
 
-## Polls SDL2 for any events that might have occured.
 proc processEvents*() =
+  ## Polls SDL2 for any events that might have occured.
   var event: sdl2.Event = defaultEvent
   while pollEvent(event):
     case event.kind:
@@ -129,13 +135,13 @@ proc processEvents*() =
       
       else: discard
 
-## Swaps the OpenGL buffers.
 proc swapBuffers*() =
+  ## Swaps the OpenGL buffers.
   window.glSwapWindow()
   updateFrameTiming()
 
-## Destroys the SDL window and OpenGL context.
 proc destroyWindow*() =
+  ## Destroys the SDL window and OpenGL context.
   window.destroy()
   context.glDeleteContext()
   sdl2.quit()
